@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvaloniaOpenGL", "Avalonia/AvaloniaOpenGL.csproj", "{2C2FC222-564D-4A07-8C35-AF500F4F5F46}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenTkDemo", "OpenTkDemo\OpenTkDemo.csproj", "{C64BFA00-EFF9-4E07-B079-BD788A85D88F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{2C2FC222-564D-4A07-8C35-AF500F4F5F46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2C2FC222-564D-4A07-8C35-AF500F4F5F46}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2C2FC222-564D-4A07-8C35-AF500F4F5F46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C64BFA00-EFF9-4E07-B079-BD788A85D88F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C64BFA00-EFF9-4E07-B079-BD788A85D88F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C64BFA00-EFF9-4E07-B079-BD788A85D88F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C64BFA00-EFF9-4E07-B079-BD788A85D88F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
