@@ -362,7 +362,7 @@ namespace ControlCatalog.Pages
             GL.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferObject);
             _glExt.BindVertexArray(_vertexArrayObject);
 
-            GL.ActiveTexture(GL_TEXTURE0);
+            GL.ActiveTexture(GL_TEXTURE1);
             GL.BindTexture(GL_TEXTURE_2D, _textureHandle);
             GL.UseProgram(_shaderProgram);
             CheckError(GL);
@@ -388,7 +388,7 @@ namespace ControlCatalog.Pages
             GL.Uniform1f(minYLoc, _minY);
             GL.Uniform1f(timeLoc, (float)St.Elapsed.TotalSeconds);
             GL.Uniform1f(discoLoc, _disco);
-            _glExt.Uniform1i(texture0Loc, 0);
+            _glExt.Uniform1i(texture0Loc, 1);
             CheckError(GL);
             GL.DrawElements(GL_TRIANGLES, _indices.Length, GL_UNSIGNED_SHORT, IntPtr.Zero);
 
