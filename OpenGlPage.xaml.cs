@@ -10,6 +10,7 @@ using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
 using Avalonia.Platform.Interop;
 using Avalonia.Threading;
+using SixLabors.ImageSharp.PixelFormats;
 using static Avalonia.OpenGL.GlConsts;
 // ReSharper disable StringLiteralTypo
 
@@ -90,6 +91,7 @@ namespace ControlCatalog.Pages
         private int _vertexBufferObject;
         private int _indexBufferObject;
         private int _vertexArrayObject;
+        private int _textureHandle;
         private GlExtrasInterface _glExt;
 
         private string GetShader(bool fragment, string shader)
@@ -156,6 +158,7 @@ namespace ControlCatalog.Pages
         uniform float uMinY;
         uniform float uTime;
         uniform float uDisco;
+        uniform sampler2D texture0;
         //DECLAREGLFRAG
 
         void main()
@@ -171,6 +174,8 @@ namespace ControlCatalog.Pages
 
             vec3 objectColor = vec3((1.0 - y), 0.40 +  y / 4.0, y * 0.75 + 0.25);
             objectColor = objectColor * (1.0 - uDisco) + discoColor * uDisco;
+
+            objectColor = texture(texture0, FragPos.xy / 5).rgb;
 
             float ambientStrength = 0.3;
             vec3 lightColor = vec3(1.0, 1.0, 1.0);
@@ -260,7 +265,21 @@ namespace ControlCatalog.Pages
             _glExt = new GlExtrasInterface(GL);
 
             Info = $"Renderer: {GL.GetString(GL_RENDERER)} Version: {GL.GetString(GL_VERSION)}";
-            
+
+            int[] textures = new int[1];
+            GL.GenTextures(1, textures);
+            _textureHandle = textures[0];
+            GL.BindTexture(GL_TEXTURE_2D, _textureHandle);
+            using (SixLabors.ImageSharp.Image<Rgba32> image = SixLabors.ImageSharp.Image.Load<Rgba32>("logo.png"))
+            {
+                if (!image.TryGetSinglePixelSpan(out var pixels))
+                    throw new Exception();
+                fixed (void* pData = pixels)
+                    GL.TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.Width, image.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, new IntPtr(pData));
+                _glExt.GenerateMipmap(GL_TEXTURE_2D);
+            }
+            GL.BindTexture(GL_TEXTURE_2D, 0);
+
             // Load the source of the vertex shader and compile it.
             _vertexShader = GL.CreateShader(GL_VERTEX_SHADER);
             Console.WriteLine(GL.CompileShaderAndGetError(_vertexShader, VertexShaderSource));
@@ -312,6 +331,8 @@ namespace ControlCatalog.Pages
 
         protected override void OnOpenGlDeinit(GlInterface GL, int fb)
         {
+            GL.BindTexture(GL_TEXTURE_2D, 0);
+            
             // Unbind everything
             GL.BindBuffer(GL_ARRAY_BUFFER, 0);
             GL.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -319,6 +340,8 @@ namespace ControlCatalog.Pages
             GL.UseProgram(0);
 
             // Delete all resources.
+            int[] textures = new int[] { _textureHandle };
+            GL.DeleteTextures(1, textures);
             GL.DeleteBuffers(2, new[] { _vertexBufferObject, _indexBufferObject });
             _glExt.DeleteVertexArrays(1, new[] { _vertexArrayObject });
             GL.DeleteProgram(_shaderProgram);
@@ -338,6 +361,9 @@ namespace ControlCatalog.Pages
             GL.BindBuffer(GL_ARRAY_BUFFER, _vertexBufferObject);
             GL.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferObject);
             _glExt.BindVertexArray(_vertexArrayObject);
+
+            GL.ActiveTexture(GL_TEXTURE0);
+            GL.BindTexture(GL_TEXTURE_2D, _textureHandle);
             GL.UseProgram(_shaderProgram);
             CheckError(GL);
             var projection =
@@ -354,6 +380,7 @@ namespace ControlCatalog.Pages
             var minYLoc = GL.GetUniformLocationString(_shaderProgram, "uMinY");
             var timeLoc = GL.GetUniformLocationString(_shaderProgram, "uTime");
             var discoLoc = GL.GetUniformLocationString(_shaderProgram, "uDisco");
+            var texture0Loc = GL.GetUniformLocationString(_shaderProgram, "texture0");
             GL.UniformMatrix4fv(modelLoc, 1, false, &model);
             GL.UniformMatrix4fv(viewLoc, 1, false, &view);
             GL.UniformMatrix4fv(projectionLoc, 1, false, &projection);
@@ -361,6 +388,7 @@ namespace ControlCatalog.Pages
             GL.Uniform1f(minYLoc, _minY);
             GL.Uniform1f(timeLoc, (float)St.Elapsed.TotalSeconds);
             GL.Uniform1f(discoLoc, _disco);
+            _glExt.Uniform1i(texture0Loc, 0);
             CheckError(GL);
             GL.DrawElements(GL_TRIANGLES, _indices.Length, GL_UNSIGNED_SHORT, IntPtr.Zero);
 
@@ -396,6 +424,14 @@ namespace ControlCatalog.Pages
                 GenVertexArrays(1, rv);
                 return rv[0];
             }
+            
+            public delegate void GlUniform1i(int location, int ialue);
+            [GlEntryPoint("glUniform1i")]
+            public GlUniform1i Uniform1i { get; }
+            
+            public delegate void GlGenerateMipmap(int target);
+            [GlMinVersionEntryPoint("glGenerateMipmap", 3,0)]
+            public GlGenerateMipmap GenerateMipmap { get; }
         }
     }
 }
