@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove=".gitignore" />
+    <None Update="teapot.bin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="0.10.8" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.10.8" />
+    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="0.10.8" />
+    <PackageReference Include="HarfBuzzSharp" Version="2.8.2-preview.127" />
+    <PackageReference Include="SkiaSharp" Version="2.88.0-preview.127" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
+   </ItemGroup>
+  <ItemGroup>
+    <None Remove="OpenGlPage.xaml" />
+    <AvaloniaResource Include="OpenGlPage.xaml" />
+  </ItemGroup>
+</Project>
